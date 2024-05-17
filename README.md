@@ -10,7 +10,7 @@ Sync map 范型版
 
 This toolkit provides a comprehensive encapsulation of the methods in sync.Map, ensuring that both the parameters and return values remain unchanged. As a result, these methods can be seamlessly substituted and utilized. Moreover, the presence of generics in this toolkit eliminates the need for any conversions to interface{}, enhancing its efficiency and convenience.
 
-该工具包100%封装sync.Map的方法且方法的参数和返回值都不变，因此可以直接替换使用，但由于具有泛型而能避免interface{}的转换
+该工具包100%封装sync.Map的方法，而且方法的参数和返回值都保持不变，因此可以直接替换使用，该工具使用泛型，能够有效解决原来sync.Map 的无类型问题，避免interface{}转换，当然更能让代码上下文更清楚。
 
 ```
 go get github.com/yyle88/syncmap
@@ -80,3 +80,5 @@ func main() {
 	})
 }
 ```
+
+Give me stars. Thank you!!!
