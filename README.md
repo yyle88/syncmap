@@ -1,17 +1,42 @@
 # syncmap
-
 Generics sync map
 
 泛型的 sync map
 
 Sync map generics
 
-Sync map 范型版
+Sync map 泛型版
 
-This toolkit provides a comprehensive encapsulation of the methods in sync.Map, ensuring that both the parameters and return values remain unchanged. As a result, these methods can be seamlessly substituted and utilized. Moreover, the presence of generics in this toolkit eliminates the need for any conversions to interface{}, enhancing its efficiency and convenience.
+## 使用
+`go get github.com/yyle88/syncmap`
 
-该工具包100%封装sync.Map的方法，而且方法的参数和返回值都保持不变，因此可以直接替换使用，该工具使用泛型，能够有效解决原来sync.Map 的无类型问题，避免interface{}转换，当然更能让代码上下文更清楚。
+## 用法
+[使用样例](/sync_map_test.go)
 
+## 意图
+该工具包100%封装sync.Map的方法，而且方法的参数和返回值都保持不变。
+This toolkit provides a comprehensive encapsulation of the methods in sync.Map, ensuring that both the parameters and return values remain unchanged.
+
+因此可以直接替换使用（但注意该类需要调用NewMap的初始化函数）。
+As a result, these methods can be seamlessly substituted and utilized (note that this class requires the NewMap initialization function to be called).
+
+该工具使用泛型，能够有效解决原来sync.Map 的无类型问题，避免interface{}转换，当然更能让代码上下文更清楚。
+Moreover, the presence of generics in this toolkit eliminates the need for any conversions to interface{}, enhancing its efficiency and convenience, and making the code context clean.
+
+## 说明
+比如 `var mp = NewMap[string, int]()` 这样就很清楚的知道 k-v 的类型。
+
+而且在使用 `Store` / `Load` 的时候参数就是确定的，比如 k 被限制为 int， 而返回值 v 也直接返回 string。
+
+省去 res.(string) 的转换，因为我已经通过 `value.(V)` 替你转啦。
+
+## 思路
+因为通常，我们定义一个 `sync.Map` 的目的都是存储一类 k-v 数据，很少有在同一个 `sync.Map` 里 k-v 的类型还总是变的情况，因此认为这样封装下更有用
+
+## 扩展
+由于已经自定义 `Map` 的 `struct` 因此还可以增加些自定义的操作，比如和普通map相互转换，比如提供`Keys` `Values`这些常用的语法糖等，以便于开发者使用。
+
+## 样例
 ```
 go get github.com/yyle88/syncmap
 ```

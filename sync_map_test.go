@@ -3,6 +3,8 @@ package syncmap
 import (
 	"sync"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestMap_Store(t *testing.T) {
@@ -10,7 +12,10 @@ func TestMap_Store(t *testing.T) {
 	mp.Store("a", 1)
 	value, ok := mp.Load("a")
 	t.Log(ok)
+	require.True(t, ok)
 	t.Log(value)
+	t.Log(value + value) //很明显的这里已经返回 int 结果，就可以按照 int 使用
+	t.Log(value * 2)
 }
 
 func TestSyncMap(t *testing.T) {
