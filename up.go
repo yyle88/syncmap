@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+/*
+以下函数是扩展功能，比如得到 Keys 和 Values 等，基本都是简单的语法糖，没有特别深的逻辑。
+*/
+
 func (m *Map[K, V]) GetMap() map[K]V {
 	var res = map[K]V{}
 	m.Range(func(k K, v V) bool {

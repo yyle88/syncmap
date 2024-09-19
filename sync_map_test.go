@@ -14,9 +14,14 @@ func TestMap_Store(t *testing.T) {
 	t.Log(ok)
 	require.True(t, ok)
 	t.Log(value)
+	require.Equal(t, 1, value)
 	t.Log(value + value) //很明显的这里已经返回 int 结果，就可以按照 int 使用
-	t.Log(value * 2)
+	t.Log(value * 2)     //也可以使用乘法操作，而无需 interface {} 类型转换
 }
+
+/*
+以下几个测试分别是使用 sync.Map 和 syncmap.Map 的单元测试，流程相同，结果也相同
+*/
 
 func TestSyncMap(t *testing.T) {
 	// 创建一个 sync.Map 对象
@@ -127,6 +132,10 @@ func containsValue(slice interface{}, item interface{}) bool {
 	}
 	return false
 }
+
+/*
+使用 syncmap.Map 也能得到同样的效果。
+*/
 
 func TestSyncMap3(t *testing.T) {
 	// 创建一个 sync.Map 对象

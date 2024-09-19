@@ -10,6 +10,10 @@ func NewMap[K comparable, V any]() *Map[K, V] {
 	return &Map[K, V]{mp: &sync.Map{}}
 }
 
+/*
+以下的函数是按照 sync.Map 的所有函数 100% 或者说 1:1 封装的，只是多个泛型，让参数和返回值都有类型。
+*/
+
 func (m *Map[K, V]) CompareAndDelete(key K, value V) bool {
 	return m.mp.CompareAndDelete(key, value)
 }

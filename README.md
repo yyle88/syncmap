@@ -7,6 +7,15 @@ Sync map generics
 
 Sync map 泛型版
 
+## 思路
+就是把 sync.Map 使用泛型包裹了一层，让你在使用 sync.Map 的 `Load` 和 `Store` 的时候不用使用 `interface {}` 的装箱和解包，而是直接使用确定的类型，这样便于使用。
+
+在绝大多数场景下同一个 sync.Map 存的 "K 类型相同 且 V 类型相同"，很少有在同一个 sync.Map 里 "K 类型不同 或 V 类型不同" 的情况。
+
+当确定 "K 类型相同 且 V 类型相同" 时，就可以用这个工具，能够避免在使用时类型转换/混淆/出错。
+
+当确定 "K 类型不同 或 V 类型不同" 时，就继续用原来的 `sync.Map` 就行。
+
 ## 使用
 `go get github.com/yyle88/syncmap`
 
