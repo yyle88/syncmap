@@ -11,6 +11,10 @@
 
 It makes using `sync.Map` easier and safer by letting you define the types for keys and values when you create the `sync.Map`.
 
+## README
+
+[中文说明](README.zh.md)
+
 ## Why Choose SyncMap?
 
 Using `SyncMap` has several advantages:
