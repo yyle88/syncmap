@@ -15,7 +15,7 @@ It makes using `sync.Map` easier and safer by letting you define the types for k
 
 Using `SyncMap` has several advantages:
 
-- **Generic Type**: When you define the key and value types, you avoid runtime errors caused by type mismatches.
+- **Generic Type**: When you define the key and value types, you can avoid type mismatches.
 - **Clearer Code**: No need for type assertions, making your code easier to write.
 - **Simple Usage**: Works just same as `sync.Map`, so there’s no steep learning curve.
 
@@ -60,7 +60,7 @@ func main() {
 
 ### How This Example Helps
 
-1. **Defines Clear Types**: The key is a `string`, and the value is a `User`. Without using `interface{}` store value.
+1. **Defines Clear Types**: The key is a `string`, and the value is a `User`. Without using `interface{}` to store value.
 2. **Simplifies Data Access**: No need for manual type assertions when loading data. No need `user = v.(*User)` logic.
 3. **Works Same with `sync.Map`**: If you have used `sync.Map` before, the functions like `Store` and `Load` are same.
 
@@ -112,9 +112,9 @@ func main() {
 
 | Function                  | Description                                                   |
 |---------------------------|---------------------------------------------------------------|
-| `Store(key, value)`       | Adds or updates a key-value pair.                             |
-| `Load(key)`               | Retrieves the value for a key.                                |
-| `LoadOrStore(key, value)` | Returns the value if it exists; otherwise, adds the new pair. |
+| `Store(key, value)`       | Adds or updates a key-value.                             |
+| `Load(key)`               | Retrieves the value.                                |
+| `LoadOrStore(key, value)` | Returns the value if it exists; otherwise, adds the new key-value. |
 | `Delete(key)`             | Removes a key-value pair from the map.                        |
 | `Range(func)`             | Iterates over all key-value pairs in the map.                 |
 
