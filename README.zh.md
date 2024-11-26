@@ -1,81 +1,67 @@
-# syncmap
-Generics sync map
+# SyncMap - `sync.Map` 的类型安全封装
 
-泛型的 sync map
+`SyncMap` 是一个 **类型安全** 和 **泛型** 的包装器，基于 Go 的 `sync.Map`。它通过允许你在创建 `sync.Map` 时定义键和值的类型，使得 `sync.Map` 的使用更加简便和安全。
 
-Sync map generics
+通过在创建时指定键和值的类型，使得使用 `sync.Map` 更加容易和安全。
 
-Sync map 泛型版
+## 说明文档
 
-## 思路
-就是把 sync.Map 使用泛型包裹了一层，让你在使用 sync.Map 的 `Load` 和 `Store` 的时候不用使用 `interface {}` 的装箱和解包，而是直接使用确定的类型，这样便于使用。
+[ENGLISH README](README.md)
 
-在绝大多数场景下同一个 sync.Map 存的 "K 类型相同 且 V 类型相同"，很少有在同一个 sync.Map 里 "K 类型不同 或 V 类型不同" 的情况。
+## 推荐使用 SyncMap
 
-当确定 "K 类型相同 且 V 类型相同" 时，就可以用这个工具，能够避免在使用时类型转换/混淆/出错。
+使用 `SyncMap` 有以下几个优点：
 
-当确定 "K 类型不同 或 V 类型不同" 时，就继续用原来的 `sync.Map` 就行。
+- **泛型类型**：通过定义键和值的类型，避免了因类型不匹配导致的运行时错误。
+- **更简洁的代码**：不需要类型断言，使得代码更容易编写。
+- **简单易用**：与 `sync.Map` 的使用方式相同，无需学习复杂的新概念。
 
-## 使用
-`go get github.com/yyle88/syncmap`
+## 安装
 
-## 用法
-[使用样例](/sync_map_test.go)
-
-## 意图
-该工具包100%封装sync.Map的方法，而且方法的参数和返回值都保持不变。
-This toolkit provides a comprehensive encapsulation of the methods in sync.Map, ensuring that both the parameters and return values remain unchanged.
-
-因此可以直接替换使用（但注意该类需要调用NewMap的初始化函数）。
-As a result, these methods can be seamlessly substituted and utilized (note that this class requires the NewMap initialization function to be called).
-
-该工具使用泛型，能够有效解决原来sync.Map 的无类型问题，避免interface{}转换，当然更能让代码上下文更清楚。
-Moreover, the presence of generics in this toolkit eliminates the need for any conversions to interface{}, enhancing its efficiency and convenience, and making the code context clean.
-
-## 说明
-比如 `var mp = NewMap[string, int]()` 这样就很清楚的知道 k-v 的类型。
-
-而且在使用 `Store` / `Load` 的时候参数就是确定的，比如 k 被限制为 int， 而返回值 v 也直接返回 string。
-
-省去 res.(string) 的转换，因为我已经通过 `value.(V)` 替你转啦。
-
-## 思路
-因为通常，我们定义一个 `sync.Map` 的目的都是存储一类 k-v 数据，很少有在同一个 `sync.Map` 里 k-v 的类型还总是变的情况，因此认为这样封装下更有用
-
-## 扩展
-由于已经自定义 `Map` 的 `struct` 因此还可以增加些自定义的操作，比如和普通map相互转换，比如提供`Keys` `Values`这些常用的语法糖等，以便于开发者使用。
-
-## 样例
-```
+```bash
 go get github.com/yyle88/syncmap
 ```
 
-demo1:
-```
+## 如何使用 SyncMap
+
+以下是一个简单的示例，展示了如何使用 `SyncMap` 安全地存储和检索结构化数据。
+
+### 示例：存储和检索数据
+
+```go
 package main
 
 import (
 	"fmt"
-
 	"github.com/yyle88/syncmap"
 )
 
+type User struct {
+	Name string
+	Age  int
+}
+
 func main() {
-	mp := syncmap.NewMap[int, string]()
+	// 创建一个以 string 为键、*User 为值的 SyncMap
+	users := syncmap.NewMap[string, *User]()
 
-	mp.Store(1, "a")
-	mp.Store(2, "b")
-	mp.Store(3, "c")
+	// 向 Map 中添加一个用户
+	users.Store("u1", &User{Name: "Alice", Age: 30})
 
-	mp.Range(func(key int, value string) bool {
-		fmt.Println(key, value)
-		return true
-	})
+	// 检索用户信息
+	if user, ok := users.Load("u1"); ok {
+		fmt.Printf("用户: 姓名: %s, 年龄: %d\n", user.Name, user.Age) // 输出: 用户: 姓名: Alice, 年龄: 30
+	}
 }
 ```
 
-demo2:
-```
+### 示例说明
+
+1. **明确的类型定义**：键是 `string`，值是 `User` 结构体的指针。避免使用 `interface{}` 类型存储值。
+2. **简化的数据访问**：不需要手动进行类型断言。无需像 `user = v.(*User)` 的操作。
+3. **与 `sync.Map` 使用方式相同**：如果你已经使用过 `sync.Map`，那么 `Store` 和 `Load` 等函数的使用方式是一样的。
+
+```go
 package main
 
 import (
@@ -115,4 +101,36 @@ func main() {
 }
 ```
 
-Give me stars. Thank you!!!
+---
+
+## SyncMap API
+
+`SyncMap` 提供以下函数：
+
+| 函数                      | 描述                                                         |
+|---------------------------|--------------------------------------------------------------|
+| `Store(key, value)`       | 添加或更新一个键值对。                                       |
+| `Load(key)`               | 获取指定键对应的值。                                         |
+| `LoadOrStore(key, value)` | 如果值已存在则返回该值，否则将指定的键值对添加到 Map 中。   |
+| `Delete(key)`             | 删除指定的键值对。                                           |
+| `Range(func)`             | 遍历 Map 中的所有键值对。                                    |
+
+完全与 `sync.Map` 相同。
+
+---
+
+## 许可证
+
+项目采用 MIT 许可证开源。详细的许可证内容请见 [LICENSE](LICENSE) 文件。
+
+---
+
+## 贡献
+
+我们欢迎各种形式的贡献！无论是报告问题、建议新功能，还是提交代码改进，都欢迎提交问题或拉取请求。
+
+---
+
+## 感谢
+
+如果你觉得这个包对你有帮助，请在 GitHub 上给我们一个星标！感谢支持！！！
