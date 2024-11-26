@@ -13,7 +13,7 @@
 使用 `SyncMap` 有以下几个优点：
 
 - **泛型类型**：通过定义键和值的类型，避免了因类型不匹配导致的运行时错误。
-- **更简洁的代码**：不需要类型断言，使得代码更容易编写。
+- **更简洁的代码**：不需要类型断言，避免使用 `interface{}` 的复杂操作。
 - **简单易用**：与 `sync.Map` 的使用方式相同，无需学习复杂的新概念。
 
 ## 安装
@@ -26,7 +26,7 @@ go get github.com/yyle88/syncmap
 
 以下是一个简单的示例，展示了如何使用 `SyncMap` 安全地存储和检索结构化数据。
 
-### 示例：存储和检索数据
+### 示例 1：存储和检索数据
 
 ```go
 package main
@@ -42,7 +42,7 @@ type User struct {
 }
 
 func main() {
-	// 创建一个以 string 为键、*User 为值的 SyncMap
+	// 创建一个以 string 为键、User 结构体指针为值的 SyncMap
 	users := syncmap.NewMap[string, *User]()
 
 	// 向 Map 中添加一个用户
@@ -55,18 +55,19 @@ func main() {
 }
 ```
 
-### 示例说明
+#### 说明
 
-1. **明确的类型定义**：键是 `string`，值是 `User` 结构体的指针。避免使用 `interface{}` 类型存储值。
-2. **简化的数据访问**：不需要手动进行类型断言。无需像 `user = v.(*User)` 的操作。
-3. **与 `sync.Map` 使用方式相同**：如果你已经使用过 `sync.Map`，那么 `Store` 和 `Load` 等函数的使用方式是一样的。
+1. **明确的类型定义**：键是 `string`，值是 `User` 结构体的指针，避免了使用 `interface{}` 这个模糊的类型来存储值。
+2. **简化的数据访问**：不需要手动进行类型断言，直接获取数据时无需 `user = v.(*User)` 的操作。
+3. **与 `sync.Map` 使用方式相同**：与传统的 `sync.Map` 使用方式一致，`Store` 和 `Load` 等方法不需要额外学习。
+
+### 示例 2：使用 SyncMap 存储、删除和遍历数据
 
 ```go
 package main
 
 import (
 	"fmt"
-
 	"github.com/yyle88/syncmap"
 )
 
@@ -77,8 +78,10 @@ type Person struct {
 }
 
 func main() {
+	// 创建一个以 int 为键、*Person 为值的 SyncMap
 	mp := syncmap.NewMap[int, *Person]()
 
+	// 向 Map 中添加几个 Person
 	mp.Store(1, &Person{
 		Name:     "Kratos",
 		HomePage: "https://go-kratos.dev/",
@@ -92,8 +95,10 @@ func main() {
 		Age:  18,
 	})
 
+	// 删除键为 3 的元素
 	mp.Delete(3)
 
+	// 遍历 Map 中的所有元素
 	mp.Range(func(key int, value *Person) bool {
 		fmt.Println(key, value.Name, value.Age, value.HomePage)
 		return true
@@ -101,19 +106,25 @@ func main() {
 }
 ```
 
+#### 说明
+
+1. **存储和删除**：这个示例展示了如何存储多个对象，并通过 `Delete` 方法删除指定的元素。
+2. **遍历操作**：通过 `Range` 方法遍历 `SyncMap` 中所有的键值对，无需手动操作 `sync.Map` 的底层实现。
+3. **简化操作**：相比于传统的 `sync.Map`，这段代码中不需要任何类型断言，操作直观且清晰。
+
 ---
 
 ## SyncMap API
 
 `SyncMap` 提供以下函数：
 
-| 函数                      | 描述                                                         |
-|---------------------------|--------------------------------------------------------------|
-| `Store(key, value)`       | 添加或更新一个键值对。                                       |
-| `Load(key)`               | 获取指定键对应的值。                                         |
-| `LoadOrStore(key, value)` | 如果值已存在则返回该值，否则将指定的键值对添加到 Map 中。   |
-| `Delete(key)`             | 删除指定的键值对。                                           |
-| `Range(func)`             | 遍历 Map 中的所有键值对。                                    |
+| 函数                        | 描述                              |
+|---------------------------|---------------------------------|
+| `Store(key, value)`       | 添加或更新一个键值对。                     |
+| `Load(key)`               | 获取指定键对应的值。                      |
+| `LoadOrStore(key, value)` | 如果值已存在则返回该值，否则将指定的键值对添加到 Map 中。 |
+| `Delete(key)`             | 删除指定的键值对。                       |
+| `Range(func)`             | 遍历 Map 中的所有键值对。                 |
 
 完全与 `sync.Map` 相同。
 

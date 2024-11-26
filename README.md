@@ -19,9 +19,9 @@ It makes using `sync.Map` easier and safer by letting you define the types for k
 
 Using `SyncMap` has several advantages:
 
-- **Generic Type**: When you define the key and value types, you can avoid type mismatches.
-- **Clearer Code**: No need for type assertions, making your code easier to write.
-- **Simple Usage**: Works just same as `sync.Map`, so there’s no steep learning curve.
+- **Generic Type**: Helps avoid type mismatches during runtime.
+- **Clearer Code**: No need for type assertions from `interface{}`.
+- **Simple Usage**: Works just same as `sync.Map`, same methods.
 
 ## Installation
 
@@ -33,7 +33,7 @@ go get github.com/yyle88/syncmap
 
 Here’s a simple example showing how you can use `SyncMap` to safely store and retrieve structured data.
 
-### Example: Storing and Retrieving Data
+### Example 1: Storing and Retrieving Data
 
 ```go
 package main
@@ -62,18 +62,19 @@ func main() {
 }
 ```
 
-### How This Example Helps
+#### Explanation
 
-1. **Defines Clear Types**: The key is a `string`, and the value is a `User`. Without using `interface{}` to store value.
-2. **Simplifies Data Access**: No need for manual type assertions when loading data. No need `user = v.(*User)` logic.
-3. **Works Same with `sync.Map`**: If you have used `sync.Map` before, the functions like `Store` and `Load` are same.
+1. **Defines Clear Types**: The key is a `string`, and the value is a `User` struct pointer, avoiding the use of `interface{}` for values.
+2. **Simplifies Data Access**: No need for manual type assertions like `user = v.(*User)` when retrieving data.
+3. **Works Same with `sync.Map`**: Functions like `Store` and `Load` are exactly the same as in `sync.Map`, so you don't need to learn new methods.
+
+### Example 2: Storing, Deleting, and Iterating Over Data
 
 ```go
 package main
 
 import (
 	"fmt"
-
 	"github.com/yyle88/syncmap"
 )
 
@@ -84,8 +85,10 @@ type Person struct {
 }
 
 func main() {
+	// Create a SyncMap with int keys and *Person values
 	mp := syncmap.NewMap[int, *Person]()
 
+	// Add some persons to the map
 	mp.Store(1, &Person{
 		Name:     "Kratos",
 		HomePage: "https://go-kratos.dev/",
@@ -99,8 +102,10 @@ func main() {
 		Age:  18,
 	})
 
+	// Delete the entry with key 3
 	mp.Delete(3)
 
+	// Iterate over all items in the map
 	mp.Range(func(key int, value *Person) bool {
 		fmt.Println(key, value.Name, value.Age, value.HomePage)
 		return true
@@ -108,21 +113,27 @@ func main() {
 }
 ```
 
+#### Explanation
+
+1. **Store and Delete**: This example shows how to add multiple entries and delete one using the `Delete` method.
+2. **Iterate Over Data**: The `Range` method is used to iterate over all the key-value pairs in the map, which simplifies traversing the map compared to manually managing `sync.Map`'s iteration.
+3. **Simplified Operations**: Just like with the previous example, no type assertions are required, and the usage is straightforward.
+
 ---
 
 ## SyncMap API
 
 `SyncMap` provides the following functions:
 
-| Function                  | Description                                                   |
-|---------------------------|---------------------------------------------------------------|
-| `Store(key, value)`       | Adds or updates a key-value.                             |
-| `Load(key)`               | Retrieves the value.                                |
-| `LoadOrStore(key, value)` | Returns the value if it exists; otherwise, adds the new key-value. |
-| `Delete(key)`             | Removes a key-value pair from the map.                        |
-| `Range(func)`             | Iterates over all key-value pairs in the map.                 |
+| Function                  | Description                                                      |
+|---------------------------|------------------------------------------------------------------|
+| `Store(key, value)`       | Adds or updates a key-value.                                     |
+| `Load(key)`               | Retrieves the value.                                             |
+| `LoadOrStore(key, value)` | Returns the value if it exists; otherwise, adds a new key-value. |
+| `Delete(key)`             | Removes the key-value pair from the map.                         |
+| `Range(func)`             | Iterates over all key-value pairs in the map.                    |
 
-Same with `sync.Map`
+Same as `sync.Map`.
 
 ---
 
