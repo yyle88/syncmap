@@ -8,6 +8,12 @@ type Map[K comparable, V any] struct {
 	mp *sync.Map
 }
 
+// New creates a new instance of Map.
+// New 创建一个新的 Map 实例。
+func New[K comparable, V any]() *Map[K, V] {
+	return NewMap[K, V]()
+}
+
 // NewMap creates a new instance of Map.
 // NewMap 创建一个新的 Map 实例。
 func NewMap[K comparable, V any]() *Map[K, V] {

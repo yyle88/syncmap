@@ -5,8 +5,8 @@ import (
 )
 
 /*
-Some simple syntactic sugar without complex logic.
-这些是增补的函数，这些函数能提供简单的语法糖，能否方便使用。
+Offers some utils functions to make usage simple. Support tasks like getting keys, values, and pairs, and copying data between maps.
+提供辅助函数，简化使用。这些函数支持获取键、值、键值对或在 map 间复制数据等操作。
 */
 
 // GetMap returns all key-value pairs as a standard Go map.

@@ -1,14 +1,41 @@
-package syncmap
+package syncmap_test
 
 import (
 	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/yyle88/syncmap"
 )
 
+func TestMap_New(t *testing.T) {
+	// Test both New and NewMap for consistency
+	m1 := syncmap.New[string, int]()
+	m2 := syncmap.NewMap[string, int]()
+	require.NotNil(t, m1, "New should return a non-nil Map")
+	require.NotNil(t, m2, "NewMap should return a non-nil Map")
+
+	// Verify initial state
+	_, ok := m1.Load("key")
+	require.False(t, ok, "New Map should be empty")
+	_, ok = m2.Load("key")
+	require.False(t, ok, "NewMap should be empty")
+}
+
+func TestMap_StoreAndLoad(t *testing.T) {
+	m := syncmap.NewMap[string, float64]()
+	m.Store("pi", 3.14)
+
+	value, ok := m.Load("pi")
+	require.True(t, ok, "Load should return true for existing key")
+	require.Equal(t, 3.14, value, "Load should return stored value")
+
+	_, ok = m.Load("unknown")
+	require.False(t, ok, "Load should return false for non-existing key")
+}
+
 func TestMap_Store(t *testing.T) {
-	var mp = NewMap[string, int]()
+	var mp = syncmap.NewMap[string, int]()
 	mp.Store("a", 1)
 	value, ok := mp.Load("a")
 	t.Log(ok)
@@ -19,9 +46,127 @@ func TestMap_Store(t *testing.T) {
 	t.Log(value * 2)     //也可以使用乘法操作，而无需 interface {} 类型转换
 }
 
-/*
-以下几个测试分别是使用 sync.Map 和 syncmap.Map 的单元测试，流程相同，结果也相同
-*/
+func TestMap_Delete(t *testing.T) {
+	m := syncmap.NewMap[int, string]()
+	m.Store(1, "one")
+
+	m.Delete(1)
+	_, ok := m.Load(1)
+	require.False(t, ok, "Delete should remove the key")
+
+	// Deleting non-existing key should not panic
+	m.Delete(2)
+	_, ok = m.Load(2)
+	require.False(t, ok, "Deleting non-existing key should have no effect")
+}
+
+func TestMap_LoadOrStore(t *testing.T) {
+	m := syncmap.NewMap[string, bool]()
+
+	// Store new key
+	value, loaded := m.LoadOrStore("active", true)
+	require.False(t, loaded, "LoadOrStore should return false for new key")
+	require.True(t, value, "LoadOrStore should return stored value")
+
+	// Load existing key
+	value, loaded = m.LoadOrStore("active", false)
+	require.True(t, loaded, "LoadOrStore should return true for existing key")
+	require.True(t, value, "LoadOrStore should return original value")
+}
+
+func TestMap_LoadAndDelete(t *testing.T) {
+	m := syncmap.NewMap[int, string]()
+	m.Store(42, "answer")
+
+	value, ok := m.LoadAndDelete(42)
+	require.True(t, ok, "LoadAndDelete should return true for existing key")
+	require.Equal(t, "answer", value, "LoadAndDelete should return correct value")
+	_, ok = m.Load(42)
+	require.False(t, ok, "Key should be deleted")
+
+	value, ok = m.LoadAndDelete(99)
+	require.False(t, ok, "LoadAndDelete should return false for non-existing key")
+	require.Equal(t, "", value, "LoadAndDelete should return zero value")
+}
+
+func TestMap_Swap(t *testing.T) {
+	m := syncmap.NewMap[string, int]()
+	m.Store("count", 10)
+
+	// Swap existing key
+	{
+		previous, ok := m.Swap("count", 20)
+		require.True(t, ok, "Swap should return true for existing key")
+		require.Equal(t, 10, previous, "Swap should return previous value")
+		value, _ := m.Load("count")
+		require.Equal(t, 20, value, "New value should be set")
+	}
+
+	// Swap non-existing key
+	{
+		previous, ok := m.Swap("new", 30)
+		require.False(t, ok, "Swap should return false for non-existing key")
+		require.Equal(t, 0, previous)
+		value, ok := m.Load("new")
+		require.True(t, ok, "Key should now exist")
+		require.Equal(t, 30, value, "New value should be set")
+	}
+}
+
+func TestMap_CompareAndSwap(t *testing.T) {
+	m := syncmap.NewMap[string, string]()
+	m.Store("color", "blue")
+
+	// Wrong old value
+	result := m.CompareAndSwap("color", "red", "green")
+	require.False(t, result, "CompareAndSwap should fail with wrong old value")
+	value, _ := m.Load("color")
+	require.Equal(t, "blue", value, "Value should remain unchanged")
+
+	// Correct old value
+	result = m.CompareAndSwap("color", "blue", "green")
+	require.True(t, result, "CompareAndSwap should succeed with correct old value")
+	value, _ = m.Load("color")
+	require.Equal(t, "green", value, "Value should be swapped")
+}
+
+func TestMap_CompareAndDelete(t *testing.T) {
+	m := syncmap.NewMap[string, int]()
+	m.Store("x", 100)
+
+	// Wrong value
+	result := m.CompareAndDelete("x", 200)
+	require.False(t, result, "CompareAndDelete should fail with wrong value")
+	_, ok := m.Load("x")
+	require.True(t, ok, "Key should still exist")
+
+	// Correct value
+	result = m.CompareAndDelete("x", 100)
+	require.True(t, result, "CompareAndDelete should succeed with correct value")
+	_, ok = m.Load("x")
+	require.False(t, ok, "Key should be deleted")
+}
+
+func TestMap_Range(t *testing.T) {
+	m := syncmap.NewMap[string, int]()
+	m.Store("a", 1)
+	m.Store("b", 2)
+
+	count := 0
+	m.Range(func(k string, v int) bool {
+		count++
+		switch k {
+		case "a":
+			require.Equal(t, 1, v, "Range should yield correct value for key 'a'")
+		case "b":
+			require.Equal(t, 2, v, "Range should yield correct value for key 'b'")
+		default:
+			t.Errorf("Unexpected key: %v", k)
+		}
+		return true
+	})
+	require.Equal(t, 2, count, "Range should iterate over all entries")
+}
 
 func TestSyncMap(t *testing.T) {
 	// 创建一个 sync.Map 对象
@@ -115,31 +260,9 @@ func TestSyncMap2(t *testing.T) {
 	}
 }
 
-func containsValue(slice interface{}, item interface{}) bool {
-	switch s := slice.(type) {
-	case []string:
-		for _, v := range s {
-			if v == item.(string) {
-				return true
-			}
-		}
-	case []int:
-		for _, v := range s {
-			if v == item.(int) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-/*
-使用 syncmap.Map 也能得到同样的效果。
-*/
-
 func TestSyncMap3(t *testing.T) {
 	// 创建一个 sync.Map 对象
-	var m = NewMap[string, int]()
+	var m = syncmap.NewMap[string, int]()
 
 	// 测试 Store 和 Load 方法
 	m.Store("foo", 1)
@@ -186,7 +309,7 @@ func TestSyncMap3(t *testing.T) {
 
 func TestSyncMap4(t *testing.T) {
 	// 创建一个 sync.Map 对象
-	var m = NewMap[string, int64]()
+	var m = syncmap.NewMap[string, int64]()
 
 	// 测试 Store 和 Load 方法
 	m.Store("foo", 1)
@@ -226,6 +349,24 @@ func TestSyncMap4(t *testing.T) {
 	if _, ok := m.Load("foo"); ok {
 		t.Errorf("Delete failed")
 	}
+}
+
+func containsValue(slice interface{}, item interface{}) bool {
+	switch s := slice.(type) {
+	case []string:
+		for _, v := range s {
+			if v == item.(string) {
+				return true
+			}
+		}
+	case []int:
+		for _, v := range s {
+			if v == item.(int) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func sliceContains[V comparable](slice []V, value V) bool {

@@ -151,4 +151,10 @@ We welcome contributions of all kinds! Whether it’s reporting a bug, suggestin
 
 ## Thank You
 
-If you find this package valuable, give it a star on GitHub! Thank you!!!
+If you find this package valuable, give me some stars on GitHub! Thank you!!!
+
+---
+
+## GitHub Stars
+
+[![starring](https://starchart.cc/yyle88/syncmap.svg?variant=adaptive)](https://starchart.cc/yyle88/syncmap)
